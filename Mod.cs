@@ -5,18 +5,30 @@ using VRCModLoader;
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace Mod
-{
+namespace Mod {
+    public class LogJob {
+        public bool Locked { get; internal set; }
+        public string Pattern { get; internal set; }
+        public DirectoryInfo SourceDirectoy { get; internal set; }
+        public DirectoryInfo TargetDirectory { get; internal set; }
+        public LogJob(string pattern, DirectoryInfo sourceDir, DirectoryInfo targetDir, bool lastFileLocked = false) {
+            Pattern = pattern;SourceDirectoy = sourceDir;TargetDirectory = targetDir;Locked = lastFileLocked;
+        }
+    }
 
     [VRCModInfo("Log Manager", "1.0", "Bluscream")]
     public class LogManager : VRCMod
     {
         // DirectoryInfo logDir = new DirectoryInfo(CombinePaths(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "..", "LocalLow", "VRChat", "vrchat"));
         static DirectoryInfo logdir_final = new DirectoryInfo(Path.Combine(Application.persistentDataPath, "logs"));
+        // public List<LogJob> logJobs = new List<LogJob>();
+        /// logJobs.Add();
         static Dictionary<DirectoryInfo, string> logdirs = new Dictionary<DirectoryInfo, string>
         {
             { new DirectoryInfo(Application.persistentDataPath), "output_log_*-*-*_??.txt" },
-            { new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, "Logs")), "VRCModLoader_????-??-??-??-??-??-??.log" },
+                                                                                               //output_log_10-44-32_PM.txt
+            { new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, "Logs")), "VRCModLoader_????-??-??-??-??-??-???.log" },
+                                                                                                                               //VRCModLoader_2019-06-16-19-49-59-643.log
         };
         
         void OnApplicationStart()
@@ -58,11 +70,11 @@ namespace Mod
         }
 
         private void MoveAllLogs(bool all = false) { 
-            Utils.Log("Target Directory:", logdir_final.FullName);
+            Utils.Log("Target Directory:", logdir_final.FullName.Quote());
             foreach (var logdir in logdirs)
             {
                 var logs = getLogs(logdir.Key, logdir.Value, all);
-                Utils.Log("Moving", logs.Count(), "logs with pattern", logdir.Value.Quote(), "to", logdir.Key.FullName);
+                Utils.Log("Moving", logs.Count(), "logs with pattern", logdir.Value.Quote(), "from", logdir.Key.FullName.Quote());
                 MoveLogs(logs);
             }
         }
